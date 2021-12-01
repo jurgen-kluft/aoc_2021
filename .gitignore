@@ -1,0 +1,10 @@
+#ignore all files
+*.*
+
+#do scan all folders in 2021
+!/2021/*
+
+#except the following files
+!.gitignore
+!*.zig
+!*.txt
