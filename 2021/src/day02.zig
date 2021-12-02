@@ -1,18 +1,17 @@
-pub const std = @import("std");
-pub const mem = std.mem;
-pub const hash = std.hash;
-pub const io = std.io;
-pub const fmt = std.fmt;
-pub const math = std.math;
-pub const sort = std.sort;
-pub const unicode = std.unicode;
-pub const print = std.debug.print;
-pub const assert = std.debug.assert;
-pub const testing = std.testing;
-pub const expect = testing.expect;
-pub const expectError = testing.expectError;
-pub const expectEqual = testing.expectEqual;
-pub const expectEqualStrings = testing.expectEqualStrings;
+const std = @import("std");
+const mem = std.mem;
+const fmt = std.fmt;
+const Allocator = std.mem.Allocator;
+const List = std.ArrayList;
+const Map = std.AutoHashMap;
+const StrMap = std.StringHashMap;
+const BitSet = std.DynamicBitSet;
+const Str = []const u8;
+
+const util = @import("util.zig");
+const gpa = util.gpa;
+
+const input = @embedFile("../data/day2.txt");
 
 const Direction = enum {
     Forward,
@@ -54,16 +53,14 @@ inline fn parseInstruction(s: []const u8) !Instruction {
 }
 
 pub fn main() !void {
-    var buffer: [128]u8 = undefined;
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
-
-    const stdin = std.io.getStdIn().reader();
 
     var prog = std.ArrayList(Instruction).init(&arena.allocator);
     defer prog.deinit();
 
-    while (try stdin.readUntilDelimiterOrEof(&buffer, '\n')) |line| {
+    var lines = tokenize(u8, input, "\n");
+    while (lines.next()) |line| {
         const instruction = try parseInstruction(line);
         try prog.append(instruction);
     }
@@ -80,8 +77,8 @@ pub fn main() !void {
 }
 
 pub fn printf(comptime fmtstr: []const u8, args: anytype) void {
-    const stderr = io.getStdOut().writer();
-    nosuspend stderr.print(fmtstr, args) catch return;
+    const stdout = std.io.getStdOut().writer();
+    nosuspend stdout.print(fmtstr, args) catch return;
 }
 
 fn travel1(prog: []Instruction) i32 {
@@ -119,3 +116,31 @@ fn travel2(prog: []Instruction) i32 {
 
     return x*y;
 }
+
+// Useful stdlib functions
+const tokenize = std.mem.tokenize;
+const split = std.mem.split;
+const indexOf = std.mem.indexOfScalar;
+const indexOfAny = std.mem.indexOfAny;
+const indexOfStr = std.mem.indexOfPosLinear;
+const lastIndexOf = std.mem.lastIndexOfScalar;
+const lastIndexOfAny = std.mem.lastIndexOfAny;
+const lastIndexOfStr = std.mem.lastIndexOfLinear;
+const trim = std.mem.trim;
+const sliceMin = std.mem.min;
+const sliceMax = std.mem.max;
+
+const parseInt = std.fmt.parseInt;
+const parseFloat = std.fmt.parseFloat;
+
+const min = std.math.min;
+const min3 = std.math.min3;
+const max = std.math.max;
+const max3 = std.math.max3;
+
+const print = std.debug.print;
+const assert = std.debug.assert;
+
+const sort = std.sort.sort;
+const asc = std.sort.asc;
+const desc = std.sort.desc;

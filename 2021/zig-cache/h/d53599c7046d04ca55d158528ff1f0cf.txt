@@ -1,0 +1,1 @@
+18434 3096224744682972 1637696865000000000 2ee71bba958986f8f51cb101ebe2a28f E:\scoop\apps\zig-dev\current\lib\libc\mingw\lib-common\user32.def.in

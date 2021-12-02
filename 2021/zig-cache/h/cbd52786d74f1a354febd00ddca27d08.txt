@@ -1,0 +1,1 @@
+28469 2814749767972269 1637696865000000000 c52bcfda78c0e3a7dee25c06d8139566 E:\scoop\apps\zig-dev\current\lib\libc\mingw\lib-common\msvcrt.def.in
