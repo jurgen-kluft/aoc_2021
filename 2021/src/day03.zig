@@ -9,20 +9,57 @@ const Str = []const u8;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("../data/day4.txt");
+const input = @embedFile("../data/day3.txt");
 
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
-    var prog = std.ArrayList(Instruction).init(&arena.allocator);
-    defer prog.deinit();
+    var report = std.ArrayList(u16).init(&arena.allocator);
+    defer report.deinit();
 
     var lines = tokenize(u8, input, "\n");
     while (lines.next()) |line| {
-        printf("{}", line);
+        var i = parseBinary(line);
+        try report.append(i);
     }
-   
+
+    var gamma: u64 = 0;
+    var epsilon: u64 = 0;
+
+    const bits = [_]u16{1<<11,1<<10,1<<9,1<<8,1<<7,1<<6,1<<5,1<<4,1<<3,1<<2,1<<1,1<<0};
+    var num_all_bits = report.items.len;
+    for (bits) |bit| {
+        var num_one_bits: usize = 0;
+        for (report.items) |n| {
+            if ((n & bit) == bit) {
+                num_one_bits += 1;
+            }
+        }
+        gamma = (gamma << 1);
+        if (num_one_bits > (num_all_bits - num_one_bits)) {
+            gamma = gamma | 1;
+        }
+    }
+    epsilon = gamma ^ 0b111111111111;
+
+    printf("gamma {}, epsilon {}\n", .{gamma, epsilon});
+    printf("power consumption = {}\n", .{gamma * epsilon});
+    
+    return;
+}
+
+pub fn parseBinary(str: []const u8) u16 {
+    var value: u16 = 0;
+    for (str) |c| {
+        const bit: u16 = switch (c) {
+            '0' => 0,
+            '1' => 1,
+            else => 0,
+        };
+        value = (value << 1) | bit;
+    }
+    return value;
 }
 
 pub fn printf(comptime fmtstr: []const u8, args: anytype) void {

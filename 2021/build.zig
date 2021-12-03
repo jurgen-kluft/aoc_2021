@@ -3,7 +3,7 @@ const Builder = std.build.Builder;
 const LibExeObjStep = std.build.LibExeObjStep;
 
 // set this to true to link libc
-const should_link_libc = true;
+const should_link_libc = false;
 
 const test_files = [_][]const u8{
     // list any zig files with tests here

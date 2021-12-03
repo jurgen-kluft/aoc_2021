@@ -19,6 +19,7 @@ pub fn main() !void {
     defer prog.deinit();
 
     var lines = tokenize(u8, input, "\n");
+    
     while (lines.next()) |line| {
         printf("{}", line);
     }

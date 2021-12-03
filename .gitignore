@@ -1,10 +1,11 @@
 #ignore all files
 *.*
-zig-cache/
-
+2021/zig-cache/*
+2021/zig-out/*
 
 #do scan all folders in 2021
-!/2021/*
+!/2021/data/*
+!/2021/src/*
 
 #except the following files
 !.gitignore
