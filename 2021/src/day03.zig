@@ -12,10 +12,7 @@ const gpa = util.gpa;
 const input = @embedFile("../data/day3.txt");
 
 pub fn main() !void {
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
-
-    var report = std.ArrayList(u16).init(&arena.allocator);
+    var report = std.ArrayList(u16).init(std.heap.page_allocator);
     defer report.deinit();
 
     var lines = tokenize(u8, input, "\n");
@@ -24,28 +21,8 @@ pub fn main() !void {
         try report.append(i);
     }
 
-    var gamma: u64 = 0;
-    var epsilon: u64 = 0;
+    printf("part1: {}, part2: {} \n", .{ part1(report.items), part2(report.items) } );
 
-    const bits = [_]u16{1<<11,1<<10,1<<9,1<<8,1<<7,1<<6,1<<5,1<<4,1<<3,1<<2,1<<1,1<<0};
-    var num_all_bits = report.items.len;
-    for (bits) |bit| {
-        var num_one_bits: usize = 0;
-        for (report.items) |n| {
-            if ((n & bit) == bit) {
-                num_one_bits += 1;
-            }
-        }
-        gamma = (gamma << 1);
-        if (num_one_bits > (num_all_bits - num_one_bits)) {
-            gamma = gamma | 1;
-        }
-    }
-    epsilon = gamma ^ 0b111111111111;
-
-    printf("gamma {}, epsilon {}\n", .{gamma, epsilon});
-    printf("power consumption = {}\n", .{gamma * epsilon});
-    
     return;
 }
 
@@ -65,6 +42,119 @@ pub fn parseBinary(str: []const u8) u16 {
 pub fn printf(comptime fmtstr: []const u8, args: anytype) void {
     const stdout = std.io.getStdOut().writer();
     nosuspend stdout.print(fmtstr, args) catch return;
+}
+
+pub fn part2(report:[]u16) u64 {
+    const bits = [_]u16{1<<11,1<<10,1<<9,1<<8,1<<7,1<<6,1<<5,1<<4,1<<3,1<<2,1<<1,1<<0};
+
+    // Compute the oxygen generator rating
+    var o2_generator_rating: u64 = 0;
+    {
+        var mask: u16 = 0xF000;
+        var o2_bits: u16 = 0;
+        for (bits) |bit| {
+            var num_all_bits: u16 = 0;
+            var num_one_bits: u16 = 0;
+            for (report) |item| {
+                if ((item & mask) == o2_bits) {
+                    num_all_bits += 1;
+                    if ((item & bit) == bit) {
+                        num_one_bits += 1;
+                    }
+                }
+            }
+
+            mask = mask | bit;
+
+            if (num_one_bits >= (num_all_bits - num_one_bits)) {
+                // o2 rating => 1
+                o2_bits = o2_bits | bit;
+            }
+
+            var item_count: i32 = 0;
+            for (report) |item| {
+                if ((item & mask) == o2_bits) {
+                    o2_generator_rating = item;
+                    item_count += 1;
+                }
+            }
+            if (item_count == 1) {
+                printf("o2 generator rating = {}\n", .{ o2_generator_rating });
+                break;
+            }
+        }
+    }
+
+    // Compute the co2 scrubber rating
+    var co2_scrubber_rating: u64 = 0;
+    {
+        var mask: u16 = 0xF000;
+        var co2_bits: u16 = 0;
+        for (bits) |bit| {
+            var num_all_bits: u16 = 0;
+            var num_one_bits: u16 = 0;
+            for (report) |item| {
+                if ((item & mask) == co2_bits) {
+                    num_all_bits += 1;
+                    if ((item & bit) == bit) {
+                        num_one_bits += 1;
+                    }
+                }
+            }
+
+            mask = mask | bit;
+
+            if (num_one_bits < (num_all_bits - num_one_bits)) {
+                // co2 rating => 1
+                co2_bits = co2_bits | bit;
+            }
+
+            var item_count: i32 = 0;
+            for (report) |item| {
+                if ((item & mask) == co2_bits) {
+                    co2_scrubber_rating = item;
+                    item_count += 1;
+                }
+            }
+            if (item_count == 1) {
+                printf("co2 scrubber rating = {}\n", .{ co2_scrubber_rating });
+                break;
+            }
+        }
+    }
+
+    return o2_generator_rating * co2_scrubber_rating;
+}
+
+pub fn part1(report:[]u16) u64 {
+    var gamma: u64 = 0;
+    var epsilon: u64 = 0;
+
+    const bits = [_]u16{1<<11,1<<10,1<<9,1<<8,1<<7,1<<6,1<<5,1<<4,1<<3,1<<2,1<<1,1<<0};
+    var cnts = [_]u16{0,0,0,0,0,0,0,0,0,0,0,0};
+    var num_all_bits = report.len;
+    for (bits) |bit, idx| {
+        var num_one_bits: u16 = 0;
+        for (report) |n| {
+            if ((n & bit) == bit) {
+                num_one_bits += 1;
+            }
+        }
+        cnts[idx] = num_one_bits;
+    }
+
+    for (cnts) |num_one_bits| {
+        gamma = (gamma << 1);
+        if (num_one_bits > (num_all_bits - num_one_bits)) {
+            gamma = gamma | 1;
+        }
+    }
+    epsilon = gamma ^ 0b111111111111;
+
+    //printf("gamma {}, epsilon {}\n", .{gamma, epsilon});
+    //printf("power consumption = {}\n", .{gamma * epsilon});
+
+    return gamma * epsilon;
 }
 
 
