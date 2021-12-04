@@ -1,13 +1,11 @@
 const std = @import("std");
 
 pub fn main() !void {
-    var buffer: [4]u8 = undefined;
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
     const stdin = std.io.getStdIn().reader();
     const stdout = std.io.getStdOut().writer();
-    var depths = std.ArrayList(i32).init(&arena.allocator);
+    var depths = std.ArrayList(i32).init(std.heap.page_allocator);
 
+    var buffer: [128]u8 = undefined;
     while (try stdin.readUntilDelimiterOrEof(&buffer, '\n')) |line| {
         try depths.append(try std.fmt.parseInt(i32, line, 10));
     }
@@ -55,31 +53,3 @@ fn part2(depths: []i32) i32 {
     }
     return increased;
 }
-
-// Useful stdlib functions
-const tokenize = std.mem.tokenize;
-const split = std.mem.split;
-const indexOf = std.mem.indexOfScalar;
-const indexOfAny = std.mem.indexOfAny;
-const indexOfStr = std.mem.indexOfPosLinear;
-const lastIndexOf = std.mem.lastIndexOfScalar;
-const lastIndexOfAny = std.mem.lastIndexOfAny;
-const lastIndexOfStr = std.mem.lastIndexOfLinear;
-const trim = std.mem.trim;
-const sliceMin = std.mem.min;
-const sliceMax = std.mem.max;
-
-const parseInt = std.fmt.parseInt;
-const parseFloat = std.fmt.parseFloat;
-
-const min = std.math.min;
-const min3 = std.math.min3;
-const max = std.math.max;
-const max3 = std.math.max3;
-
-const print = std.debug.print;
-const assert = std.debug.assert;
-
-const sort = std.sort.sort;
-const asc = std.sort.asc;
-const desc = std.sort.desc;
